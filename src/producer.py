@@ -52,7 +52,7 @@ class ExcelProducer:
             sheetname = sheet[0]
             cells = sheet[1]
             self.sheetnameList.append(sheetname)
-            self.workbook[sheetname] = cells
+            self.workbook[sheetname] = cells and cells or [[]]
 
     def _InfillSheet(self, row, col, sheet):
         while len(sheet) < row + 1: sheet.append([])
