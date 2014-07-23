@@ -10,8 +10,9 @@ import producer
 
 class ExcelWriter:
 
-    def __init__(self, filename):
+    def __init__(self, filename, cellOverwrite=False):
         self.workbook = xlwt.Workbook('utf-8')
+        self.cellOverwrite = cellOverwrite
         self.filename = filename
 
     def Write(self, book):
@@ -23,7 +24,7 @@ class ExcelWriter:
         self.Save()
 
     def WriteASheet(self, sheetname, allCells):
-        newSheet = self.workbook.add_sheet(sheetname)
+        newSheet = self.workbook.add_sheet(sheetname, self.cellOverwrite)
         self.WriteCells(newSheet, allCells, 0, 0)
 
         self.Save()
@@ -68,12 +69,12 @@ class WriterTest(unittest.TestCase):
         self.xlsFile.Write(bookContext.GetBook())
         self.assertXlsFileEqual(self.filename, bookContext.GetBook())
 
-    def ftest_WriteASheet(self):
+    def test_WriteASheet(self):
         sheetContext = ['Hello', [['1,A', '1,B'], ['2,A', '2,B']]]
         self.xlsFile.WriteASheet(sheetContext[0], sheetContext[1])
         self.assertXlsFileEqual(self.filename, [sheetContext])
 
-    def ftest_WriteCells(self):
+    def test_WriteCells(self):
         cellsContext = [['2,A', '2,B']]
         sheet = self.xlsFile.workbook.add_sheet('Hello')
         self.xlsFile.WriteCells(sheet, cellsContext, r=1, c=0)
