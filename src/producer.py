@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import unittest
+import reader
 
 
 class ExcelProducer:
@@ -45,6 +46,13 @@ class ExcelProducer:
             book.append([sheetname, sheet])
 
         return book
+
+    def SetBook(self, book):
+        for sheet in book:
+            sheetname = sheet[0]
+            cells = sheet[1]
+            self.sheetnameList.append(sheetname)
+            self.workbook[sheetname] = cells
 
     def _InfillSheet(self, row, col, sheet):
         while len(sheet) < row + 1: sheet.append([])
@@ -113,6 +121,11 @@ class ProducerTest(unittest.TestCase):
         self.excelProducer.AddSheet(sheetname)
         self.excelProducer.AddCells(cells, sheetname)
         self.assertEqual(self.excelProducer.GetBook(), [[sheetname, cells]])
+
+    def test_SetBook(self):
+        xlsFIle = reader.ExcelReader('../test/test.xls')
+        self.excelProducer.SetBook(xlsFIle.Reads())
+        self.assertEqual(self.excelProducer.GetBook(), xlsFIle.Reads())
 
 if __name__ == '__main__':
     unittest.main()
