@@ -12,10 +12,7 @@ class ExcelProducer:
 
     def AddSheet(self, sheetname):
         self.sheetnameList.append(sheetname)
-        self.workbook[sheetname] = []
-
-    def GetSheets(self):
-        return map(lambda n: [n, [[]]], self.sheetnameList)
+        self.workbook[sheetname] = [[]]
 
     def AddCell(self, row, col, cell, sheetname):
         sheet = self.workbook.get(sheetname)
@@ -25,6 +22,11 @@ class ExcelProducer:
         self._InfillSheet(row, col, sheet)
 
         sheet[row][col] = cell
+
+    def AddCells(self, cells, sheetname):
+        for row in range(len(cells)):
+            for col in range(len(cells[row])):
+                self.AddCell(row, col, cells[row][col], sheetname)
 
     def GetCell(self, row, col, sheetname):
         sheet = self.workbook.get(sheetname)
@@ -61,12 +63,12 @@ class ProducerTest(unittest.TestCase):
     def test_ASheet(self):
         sheetname = 'WTF'
         self.excelProducer.AddSheet(sheetname)
-        self.assertEqual(self.excelProducer.GetSheets(), [['WTF', [[]]]])
+        self.assertEqual(self.excelProducer.GetBook(), [['WTF', [[]]]])
 
     def test_ManySheets(self):
         sheetnameList = ['W', 'T', 'F']
         map(lambda n: self.excelProducer.AddSheet(n), sheetnameList)
-        self.assertEqual(self.excelProducer.GetSheets(),
+        self.assertEqual(self.excelProducer.GetBook(),
                 [['W', [[]]],
                 ['T', [[]]],
                 ['F', [[]]]])
@@ -102,6 +104,15 @@ class ProducerTest(unittest.TestCase):
         self.assertEqual(self.excelProducer.GetBook(), [[sheetname, [['a', 'b', '', ''],
                                                                      ['', '', '', ''],
                                                                      ['', '', 'dog', '']]]])
+
+    def test_AddCells(self):
+        sheetname = 'Yooo'
+        cells = [['a', 'b', '', ''],
+                ['', '', '', ''],
+                ['', '', 'dog', '']]
+        self.excelProducer.AddSheet(sheetname)
+        self.excelProducer.AddCells(cells, sheetname)
+        self.assertEqual(self.excelProducer.GetBook(), [[sheetname, cells]])
 
 if __name__ == '__main__':
     unittest.main()
