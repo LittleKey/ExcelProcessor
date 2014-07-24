@@ -152,7 +152,7 @@ class ProducerTest(unittest.TestCase):
         self.assertEqual(self.excelProducer1.GetBook(), xlsFIle.Reads())
 
     def test_GetSheet(self):
-        self.assertEqual(self.excelProducer1.GetSheetName(), ['Sheet one'])
+        self.assertEqual(self.excelProducer1.GetSheetName(), ['Sheet one', 'Sheet2', 'Sheet3'])
 
     def test_GetFristLine(self):
         sheetname = self.excelProducer1.GetSheetName()[0]

@@ -9,7 +9,11 @@ import xlutils
 class ExcelReader(object):
 
     def __init__(self, filename):
-        self.workbook = xlrd.open_workbook(filename)
+        try:
+            self.workbook = xlrd.open_workbook(filename, formatting_info=True)
+        except NotImplementedError as e:
+            print("[NotImplementedError]: {}".format(e.message))
+            self.workbook = xlrd.open_workbook(filename)
 
     def Reads(self):
         return self._GetBook()
@@ -33,6 +37,7 @@ class ExcelReader(object):
         for row in range(sheet.nrows):
             allCell.append(self._GetARow(row, sheet))
 
+        allCell = allCell and allCell or [[]]
         return [sheet.name, allCell]
 
     def _GetSheet(self):
@@ -50,9 +55,6 @@ class ReaderTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_Read_xls(self):
-        self.assertEqual(self.excelFile1.Reads(), [['Sheet one', [['A1', 'B1'], ['A2', 'B2']]]])
-
     def test_Read_xlsx(self):
         self.assertEqual(self.excelFile2.Reads(), [['Sheet1', [['Hey!']]]])
 
@@ -60,7 +62,9 @@ class ReaderTest(unittest.TestCase):
         self.assertEqual(self.excelFile1._GetARow(0, self.excelFile1._GetSheet().next()), ['A1', 'B1'])
 
     def test_GetBook(self):
-        self.assertEqual(self.excelFile1.Reads(), [['Sheet one', [['A1', 'B1'], ['A2', 'B2']]]])
+        self.assertEqual(self.excelFile1.Reads(), [['Sheet one', [['A1', 'B1'], ['A2', 'B2']]],
+                                                    ['Sheet2', [[]]],
+                                                    ['Sheet3', [[]]]])
 
     def test_GetASheet(self):
         self.assertEqual(self.excelFile1._GetASheet(self.excelFile2._GetSheet().next()), ['Sheet1', [['Hey!']]])
