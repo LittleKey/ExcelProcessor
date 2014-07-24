@@ -61,7 +61,8 @@ class ExcelProducer:
     def InsertRow(self, row, aRow, sheetname):
         sheet = self._GetSheet(sheetname)
         self._InfillSheet(row, len(aRow), sheet) # infill rows
-        sheet[:] = sheet[:row] + [aRow] + sheet[row:]
+        #sheet[:] = sheet[:row] + [aRow] + sheet[row:]
+        sheet.insert(row, aRow)
 
     def _InfillSheet(self, row, col, sheet):
         while len(sheet) < row + 1: sheet.append([])
