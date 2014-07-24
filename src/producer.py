@@ -15,17 +15,17 @@ class ExcelProducer:
         self.sheetnameList.append(sheetname)
         self.workbook[sheetname] = [[]]
 
-    def AddCell(self, row, col, cell, sheetname):
+    def UpdateCell(self, row, col, cell, sheetname):
         sheet = self._GetSheet(sheetname)
 
         self._InfillSheet(row, col, sheet)
 
         sheet[row][col] = cell
 
-    def AddCells(self, cells, sheetname):
+    def UpdateCells(self, cells, sheetname):
         for row in range(len(cells)):
             for col in range(len(cells[row])):
-                self.AddCell(row, col, cells[row][col], sheetname)
+                self.UpdateCell(row, col, cells[row][col], sheetname)
 
     def GetCell(self, row, col, sheetname):
         sheet = self._GetSheet(sheetname)
@@ -60,7 +60,7 @@ class ExcelProducer:
 
     def InsertRow(self, row, aRow, sheetname):
         sheet = self._GetSheet(sheetname)
-        self._InfillSheet(row, len(aRow), sheet) # infill rows
+        self._InfillSheet(row - 1, len(aRow) - 1, sheet) # infill rows
         #sheet[:] = sheet[:row] + [aRow] + sheet[row:]
         sheet.insert(row, aRow)
 
@@ -111,16 +111,16 @@ class ProducerTest(unittest.TestCase):
         cell = 'Apple'
         sheetname='WTF'
         self.excelProducer.AddSheet(sheetname)
-        self.excelProducer.AddCell(*pos, cell=cell, sheetname=sheetname)
+        self.excelProducer.UpdateCell(*pos, cell=cell, sheetname=sheetname)
         self.assertEqual(self.excelProducer.GetCell(*pos, sheetname=sheetname), cell)
 
     def test_ManyCell(self):
         sheetname = 'W'
         self.excelProducer.AddSheet(sheetname)
-        self.excelProducer.AddCell(1, 1, 'Apple', sheetname)
-        self.excelProducer.AddCell(3, 6, 'Car', sheetname)
-        self.excelProducer.AddCell(5, 4, 'Cake', sheetname)
-        self.excelProducer.AddCell(0, 0, 'OK', sheetname)
+        self.excelProducer.UpdateCell(1, 1, 'Apple', sheetname)
+        self.excelProducer.UpdateCell(3, 6, 'Car', sheetname)
+        self.excelProducer.UpdateCell(5, 4, 'Cake', sheetname)
+        self.excelProducer.UpdateCell(0, 0, 'OK', sheetname)
         self.assertEqual(self.excelProducer.GetCell(1, 1, sheetname), 'Apple')
         self.assertEqual(self.excelProducer.GetCell(3, 6, sheetname), 'Car')
         self.assertEqual(self.excelProducer.GetCell(5, 4, sheetname), 'Cake')
@@ -132,19 +132,19 @@ class ProducerTest(unittest.TestCase):
         self.excelProducer.AddSheet(sheetname)
         for r in range(len(cells)):
             for c in range(len(cells[r])):
-                self.excelProducer.AddCell(r, c, cells[r][c], sheetname)
+                self.excelProducer.UpdateCell(r, c, cells[r][c], sheetname)
 
         self.assertEqual(self.excelProducer.GetBook(), [[sheetname, [['a', 'b', '', ''],
                                                                      ['', '', '', ''],
                                                                      ['', '', 'dog', '']]]])
 
-    def test_AddCells(self):
+    def test_UpdateCells(self):
         sheetname = 'Yooo'
         cells = [['a', 'b', '', ''],
                 ['', '', '', ''],
                 ['', '', 'dog', '']]
         self.excelProducer.AddSheet(sheetname)
-        self.excelProducer.AddCells(cells, sheetname)
+        self.excelProducer.UpdateCells(cells, sheetname)
         self.assertEqual(self.excelProducer.GetBook(), [[sheetname, cells]])
 
     def test_SetBook(self):
@@ -159,7 +159,7 @@ class ProducerTest(unittest.TestCase):
         self.assertEqual(self.excelProducer1.GetARow(0, sheetname), ['A1', 'B1'])
         self.assertNotEqual(self.excelProducer1.GetARow(1, sheetname), ['A1', 'B1'])
         self.excelProducer.AddSheet('Yooo')
-        self.excelProducer.AddCells([['a', 'b'], [], ['', '', 'c']], 'Yooo')
+        self.excelProducer.UpdateCells([['a', 'b'], [], ['', '', 'c']], 'Yooo')
         self.assertEqual(self.excelProducer.GetARow(0, 'Yooo'), ['a', 'b', ''])
 
     def test_InsertRow(self):
