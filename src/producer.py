@@ -16,9 +16,7 @@ class ExcelProducer:
         self.workbook[sheetname] = [[]]
 
     def AddCell(self, row, col, cell, sheetname):
-        sheet = self.workbook.get(sheetname)
-        if sheet == None:
-            raise ValueError("no {} sheet.".format(sheet))
+        sheet = self._GetSheet(sheetname)
 
         self._InfillSheet(row, col, sheet)
 
@@ -30,22 +28,28 @@ class ExcelProducer:
                 self.AddCell(row, col, cells[row][col], sheetname)
 
     def GetCell(self, row, col, sheetname):
-        sheet = self.workbook.get(sheetname)
-        if sheet == None:
-            raise ValueError("no {} sheet.".format(sheet))
+        sheet = self._GetSheet(sheetname)
 
         return sheet[row][col]
 
     def GetBook(self):
         book = []
         for sheetname in self.sheetnameList:
-            sheet = self.workbook[sheetname]
-            row = len(sheet) - 1
-            col = max(map(len, sheet)) - 1
-            self._InfillSheet(row, col, sheet)
+            sheet = self._GetSheet(sheetname)
+            self._Infilling(sheet)
             book.append([sheetname, sheet])
 
         return book
+
+    def GetSheetName(self):
+        return self.sheetnameList
+
+    def GetARow(self, row, sheetname):
+        sheet = self._GetSheet(sheetname)
+
+        self._Infilling(sheet)
+
+        return sheet[row]
 
     def SetBook(self, book):
         for sheet in book:
@@ -54,16 +58,36 @@ class ExcelProducer:
             self.sheetnameList.append(sheetname)
             self.workbook[sheetname] = cells and cells or [[]]
 
+    def InsertRow(self, row, aRow, sheetname):
+        sheet = self._GetSheet(sheetname)
+        self._InfillSheet(row, len(aRow), sheet) # infill rows
+        sheet[:] = sheet[:row] + [aRow] + sheet[row:]
+
     def _InfillSheet(self, row, col, sheet):
         while len(sheet) < row + 1: sheet.append([])
         for aRow in sheet:
             while len(aRow) < col + 1: aRow.append('')
+
+    def _Infilling(self, sheet):
+        row = len(sheet) - 1
+        col = max(map(len, sheet)) - 1
+        self._InfillSheet(row, col, sheet)
+
+    def _GetSheet(self, sheetname):
+        sheet = self.workbook.get(sheetname)
+        if sheet == None:
+            raise ValueError("no {} sheet.".format(sheet))
+        else:
+            return sheet
 
 
 class ProducerTest(unittest.TestCase):
 
     def setUp(self):
         self.excelProducer = ExcelProducer()
+        self.excelProducer1 = ExcelProducer()
+        xlsFile = reader.ExcelReader('../test/test.xls')
+        self.excelProducer1.SetBook(xlsFile.Reads())
 
     def tearDown(self):
         pass
@@ -124,8 +148,25 @@ class ProducerTest(unittest.TestCase):
 
     def test_SetBook(self):
         xlsFIle = reader.ExcelReader('../test/test.xls')
-        self.excelProducer.SetBook(xlsFIle.Reads())
-        self.assertEqual(self.excelProducer.GetBook(), xlsFIle.Reads())
+        self.assertEqual(self.excelProducer1.GetBook(), xlsFIle.Reads())
+
+    def test_GetSheet(self):
+        self.assertEqual(self.excelProducer1.GetSheetName(), ['Sheet one'])
+
+    def test_GetFristLine(self):
+        sheetname = self.excelProducer1.GetSheetName()[0]
+        self.assertEqual(self.excelProducer1.GetARow(0, sheetname), ['A1', 'B1'])
+        self.assertNotEqual(self.excelProducer1.GetARow(1, sheetname), ['A1', 'B1'])
+        self.excelProducer.AddSheet('Yooo')
+        self.excelProducer.AddCells([['a', 'b'], [], ['', '', 'c']], 'Yooo')
+        self.assertEqual(self.excelProducer.GetARow(0, 'Yooo'), ['a', 'b', ''])
+
+    def test_InsertRow(self):
+        row = 3
+        aRow = ['a', '', 'b']
+        sheetname = self.excelProducer1.GetSheetName()[0]
+        self.excelProducer1.InsertRow(row, aRow, sheetname)
+        self.assertEqual(self.excelProducer1.GetARow(row, sheetname), aRow)
 
 if __name__ == '__main__':
     unittest.main()
