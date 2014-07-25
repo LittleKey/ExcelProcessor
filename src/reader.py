@@ -8,9 +8,10 @@ import xlutils
 
 class ExcelReader(object):
 
-    def __init__(self, filename):
+    def __init__(self, filename, formatting=False):
+        self.formatting_info = formatting
         try:
-            self.workbook = xlrd.open_workbook(filename, formatting_info=True)
+            self.workbook = xlrd.open_workbook(filename, formatting_info=self.formatting_info)
         except NotImplementedError as e:
             print("[NotImplementedError]: {}".format(e.message))
             self.workbook = xlrd.open_workbook(filename)
@@ -44,8 +45,8 @@ class ExcelReader(object):
         for s in range(self.workbook.nsheets):
             yield self.workbook.sheet_by_index(s)
 
-    def _GetACell(self, row, col, sheet, formatting_info=False):
-        if formatting_info:
+    def _GetACell(self, row, col, sheet):
+        if self.formatting_info:
             return sheet.cell(row, col)
         else:
             return sheet.cell(row, col).value
@@ -56,7 +57,7 @@ class ReaderTest(unittest.TestCase):
     def setUp(self):
         self.excelFile1 = ExcelReader('../test/test.xls')
         self.excelFile2 = ExcelReader('../test/test_two.xlsx')
-        xlutils
+        self.excelFile3 = ExcelReader('../test/test.xls', formatting=True)
 
     def tearDown(self):
         pass
@@ -74,6 +75,18 @@ class ReaderTest(unittest.TestCase):
 
     def test_GetASheet(self):
         self.assertEqual(self.excelFile1._GetASheet(self.excelFile2._GetSheet().next()), ['Sheet1', [['Hey!']]])
+
+    def test_GetBook_format(self):
+        book = []
+        for sheet in self.excelFile3.Reads():
+            sheetname = sheet[0]
+            cells = sheet[1]
+            newCells = []
+            for row in cells:
+                newCells.append(map(lambda c: c.value, row))
+            book.append([sheetname, newCells])
+
+        self.assertEqual(book, self.excelFile1.Reads())
 
 if __name__ == '__main__':
     unittest.main()
