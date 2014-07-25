@@ -28,7 +28,7 @@ class ExcelReader(object):
     def _GetARow(self, row, sheet):
         aLine = []
         for col in range(sheet.ncols):
-            aLine.append(sheet.cell(row, col).value)
+            aLine.append(self._GetACell(row, col, sheet))
 
         return aLine
 
@@ -43,6 +43,12 @@ class ExcelReader(object):
     def _GetSheet(self):
         for s in range(self.workbook.nsheets):
             yield self.workbook.sheet_by_index(s)
+
+    def _GetACell(self, row, col, sheet, formatting_info=False):
+        if formatting_info:
+            return sheet.cell(row, col)
+        else:
+            return sheet.cell(row, col).value
 
 
 class ReaderTest(unittest.TestCase):
