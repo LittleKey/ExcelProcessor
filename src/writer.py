@@ -62,10 +62,10 @@ class WriterTest(unittest.TestCase):
         #bookContext = [['Hello', [['1,A', '1,B'], ['2,A', '2,B']]]]
         bookContext = producer.ExcelProducer()
         bookContext.AddSheet('Hello')
-        bookContext.AddCell(0, 0, '1,A', 'Hello')
-        bookContext.AddCell(0, 1, '1,B', 'Hello')
-        bookContext.AddCell(1, 3, '2,A', 'Hello')
-        bookContext.AddCell(1, 1, '2,B', 'Hello')
+        bookContext.UpdateCell(0, 0, '1,A', 'Hello')
+        bookContext.UpdateCell(0, 1, '1,B', 'Hello')
+        bookContext.UpdateCell(1, 3, '2,A', 'Hello')
+        bookContext.UpdateCell(1, 1, '2,B', 'Hello')
         self.xlsFile.Write(bookContext.GetBook())
         self.assertXlsFileEqual(self.filename, bookContext.GetBook())
 
