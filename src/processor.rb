@@ -20,8 +20,11 @@ module Excel
       row = @default_sheet.last_row
 
       aRow.length.times.each do |num|
-        row.push aRow[num]
+        value = aRow[num]
+        value = aRow[num].value if value.methods.include? :value
+        row.push value
         row.set_format(num, aRow.format(num))
+        row.height = aRow.height
       end
     end
 
