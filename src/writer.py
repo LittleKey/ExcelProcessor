@@ -44,6 +44,9 @@ class ExcelWriter:
     def Save(self):
         self.workbook.save(self.filename)
 
+    def __exit__(self):
+        self.Save()
+
 
 class WriterTest(unittest.TestCase):
 
