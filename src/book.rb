@@ -3,6 +3,8 @@
 
 #require 'test/unit'
 require 'spreadsheet'
+require 'roo'
+require 'rubyXL'
 
 Spreadsheet.client_encoding = 'UTF-8'
 
@@ -11,10 +13,11 @@ module Excel
   class Book
     attr_reader :book
     def initialize(filename='')
-      if File.exist? filename
-        @book = Spreadsheet.open filename
+      @filename = filename
+      if File.exist? @filename
+        @book = RubyXL::Parser.parse @filename
       else
-        @book = Spreadsheet::Workbook.new
+        @book = RubyXL::Workbook.new
       end
     end
 

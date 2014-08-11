@@ -51,6 +51,14 @@ class ExcelReader(object):
         else:
             return sheet.cell(row, col).value
 
+    def Cell(self, r, c, sheet):
+        return sheet.cell(r, c)
+
+
+    @property
+    def sheets(self):
+        return list(self._GetSheet())
+
 
 class ReaderTest(unittest.TestCase):
 
@@ -87,6 +95,13 @@ class ReaderTest(unittest.TestCase):
             book.append([sheetname, newCells])
 
         self.assertEqual(book, self.excelFile1.Reads())
+
+    def test_sheets(self):
+        self.assertEqual(self.excelFile2.sheets[0].name, 'Sheet1')
+
+    def test_cell(self):
+        sheet = self.excelFile2.sheets[0]
+        self.assertEqual(self.excelFile2.Cell(0, 0, sheet).value, 'Hey!')
 
 if __name__ == '__main__':
     unittest.main()
